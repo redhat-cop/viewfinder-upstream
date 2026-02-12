@@ -1,10 +1,10 @@
-# Viewfinder Lite
+# Digital Sovereignty Readiness Assessment
 
 A streamlined Digital Sovereignty assessment tool focused on providing organizations with a quick and actionable readiness evaluation.
 
 ## Overview
 
-Viewfinder Lite is a simplified version of the comprehensive Viewfinder Assessment Platform, containing only the Digital Sovereignty Readiness Assessment component. This tool helps organizations evaluate their digital sovereignty posture across 7 critical domains in just 10-15 minutes.
+This upstream "Digital Sovereignty Readiness Assessment" is a tool to help organizations evaluate their digital sovereignty posture across 7 critical domains in just 10-15 minutes.
 
 ## Screenshots
 
@@ -240,7 +240,6 @@ viewfinder-lite/
 ├── js/                          # Shared JavaScript files
 │
 ├── images/                      # Images and logos
-│   ├── viewfinder-logo.png
 │   └── screenshots/             # Documentation screenshots
 │       ├── landing-page-balanced.png
 │       ├── landing-page-custom.png

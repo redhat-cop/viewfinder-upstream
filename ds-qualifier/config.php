@@ -27,7 +27,7 @@ return [
                 'id' => 'ds3',
                 'text' => 'Can you prevent sensitive data from crossing specific geographic borders?',
                 'weight' => 1,
-                'tooltip' => 'Critical for compliance with data localization laws. Requires technical controls to ensure data stays within approved regions/countries.'
+                'tooltip' => 'True cloud portability means workloads can move between providers (e.g. AWS, Azure, local providers, on-prem) without major rewrites.'
             ]
         ]
     ],
@@ -88,9 +88,9 @@ return [
         'questions' => [
             [
                 'id' => 'as1',
-                'text' => 'Do you have contractual rights to audit your vendors\' security practices and controls?',
+                'text' => 'Do you have the ability to independently verify the security, integrity, and reliability of your digital systems, data, and infrastructure?',
                 'weight' => 1,
-                'tooltip' => 'Audit rights allow independent verification of vendor security claims. Critical for regulated industries and government organizations.'
+                'tooltip' => 'Independently verifying the security of your systems is critical for sovereignty to ensure full control of your data, maintain operational independence, and build trust through auditable, resilient infrastructure.'
             ],
             [
                 'id' => 'as2',
@@ -100,9 +100,9 @@ return [
             ],
             [
                 'id' => 'as3',
-                'text' => 'Is your organization certified against your country\'s national security standards (e.g., NIS2, SecNumCloud)?',
+                'text' => 'Are you aware of your country’s applicable sovereignty related standards ?',
                 'weight' => 1,
-                'tooltip' => 'National certifications (NIS2 in EU, SecNumCloud in France, FedRAMP in US) prove compliance with sovereign security requirements.'
+                'tooltip' => 'Global regulations related to digital sovereignty are still evolving and vary widely but generally focus on a state\'s control over data and technology within its borders. These rules are often motivated by national security, economic interests, and the protection of citizen privacy, and they can significantly impact how companies operate internationally.'
             ]
         ]
     ],

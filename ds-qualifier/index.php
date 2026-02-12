@@ -29,6 +29,9 @@
     .pf-c-page__header-tools button {
       margin-right: 1rem;
     }
+    .widget {
+      padding-top: 1rem;
+    }
   </style>
 </head>
 
@@ -36,9 +39,6 @@
   <header class="pf-c-page__header">
     <div class="pf-c-page__header-brand">
       <div class="pf-c-page__header-brand-toggle"></div>
-      <a class="pf-c-page__header-brand-link" href="../index.php">
-        <img class="pf-c-brand" src="../images/viewfinder-logo.png" alt="Viewfinder logo" />
-      </a>
     </div>
 
     <div class="widget">

@@ -466,15 +466,6 @@
 </head>
 
 <body>
-  <header class="pf-c-page__header">
-    <div class="pf-c-page__header-brand">
-      <div class="pf-c-page__header-brand-toggle"></div>
-      <a class="pf-c-page__header-brand-link" href="index.php">
-        <img class="pf-c-brand" src="images/viewfinder-logo.png" alt="Viewfinder logo" />
-      </a>
-    </div>
-  </header>
-
   <div class="landing-page-wrapper">
     <div class="container" style="max-width: 1400px; margin: 2rem auto; padding: 0 2rem;">
       <div style="text-align: center; margin-bottom: 0;">
@@ -751,7 +742,7 @@
   </div>
 
   <footer class="disclaimer-footer">
-    <p><strong>Disclaimer:</strong> This Cloud Sovereignty Framework Self-Assessment Tool is provided to help organizations review their sovereign posture. It is not endorsed by any regulatory authority, and its findings or recommendations do not constitute legal advice. We bear no legal responsibility or liability for the results or its use.</p>
+    <p><strong>Disclaimer:</strong> This Digital Sovereignty Readiness Assessment Tool is provided by Red Hat for informational purposes only to help organizations review their general sovereign posture. It cannot be used to validate an organization’s compliance with any specific sovereignty requirements. It is not endorsed by any regulatory authority, and its findings or recommendations do not constitute legal advice. Red Hat bears no legal responsibility or liability for the results or its use. No identity data will be collected or saved.</p>
   </footer>
 </body>
 </html>

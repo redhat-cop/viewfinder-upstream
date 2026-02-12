@@ -56,12 +56,14 @@ $maxScore = 21;
 $domainScores = [];
 $domainMaxScores = [];
 $domainWeightedScores = [];
+$domainResponses = [];
 $unknownQuestions = [];
 
 // Initialize domain scores
 foreach ($questions as $domainName => $domainData) {
     $domainScores[$domainName] = 0;
     $domainMaxScores[$domainName] = count($domainData['questions']);
+    $domainResponses[$domainName] = [];
 }
 
 // Calculate scores - EXACT same logic as results.php
@@ -83,6 +85,10 @@ foreach ($assessmentData as $key => $value) {
                         $intValue = intval($value);
                         $totalScore += $intValue;
                         $domainScores[$domainName] += $intValue;
+                        // Track "Yes" responses (value > 0)
+                        if ($intValue > 0) {
+                            $domainResponses[$domainName][] = $question['text'];
+                        }
                     }
                     break 2;
                 }
@@ -302,13 +308,21 @@ $html = '<!DOCTYPE html>
         <div class="recommendation">' . htmlspecialchars($recommendationDetail) . '</div>
     </div>
 
+    <div class="section" style="background: #f9f9f9; padding: 15px; border-radius: 4px; margin-bottom: 20px;">
+        <h3 style="margin-top: 0; color: #333; border-bottom: none; font-size: 14px;">Profile Information</h3>
+        <p style="margin: 5px 0; font-size: 11pt;"><strong>' . htmlspecialchars($profileData['name']) . '</strong></p>
+        <p style="margin: 5px 0; color: #666; font-size: 10pt;">' . htmlspecialchars($profileData['description']) . '</p>
+    </div>
+
     <div class="section">
         <h3>Domain Analysis</h3>
+        <p style="font-size: 10pt; color: #666; margin: 10px 0;">Weights reflect the importance of each domain for the <strong>' . htmlspecialchars($profileData['name']) . '</strong> profile. Domains with higher weights (\u2265\u00a01.5\u00d7) contribute more to your overall score.</p>
         <table>
             <thead>
                 <tr>
                     <th>Domain</th>
                     <th style="text-align: center;">Score</th>
+                    <th style="text-align: center;">Weight</th>
                     <th style="text-align: center;">Percentage</th>
                     <th>Maturity Level</th>
                 </tr>
@@ -319,6 +333,7 @@ foreach ($questions as $domainName => $domainData) {
     $score = $domainScores[$domainName] ?? 0;
     $maxDomainScore = count($domainData['questions']);
     $percentage = $maxDomainScore > 0 ? round(($score / $maxDomainScore) * 100) : 0;
+    $weight = $domainWeights[$domainName] ?? 1.0;
 
     if ($percentage == 0) {
         $badge = 'initial';
@@ -340,9 +355,12 @@ foreach ($questions as $domainName => $domainData) {
         $levelText = 'Optimizing';
     }
 
+    $weightStyle = $weight >= 1.5 ? 'background: #f0ab00; color: #fff; font-weight: bold;' : 'background: #f5f5f5; color: #333;';
+
     $html .= '<tr>
                 <td><strong>' . htmlspecialchars($domainName) . '</strong></td>
                 <td style="text-align: center;">' . $score . '/' . $maxDomainScore . '</td>
+                <td style="text-align: center;"><span style="display: inline-block; padding: 3px 8px; border-radius: 3px; ' . $weightStyle . '">' . number_format($weight, 1) . '\u00d7</span></td>
                 <td style="text-align: center;">' . $percentage . '%</td>
                 <td><span class="badge badge-' . $badge . '">' . $levelText . '</span></td>
               </tr>';
@@ -450,6 +468,46 @@ if ($maturityLevel === 'Initial') {
         </ul>
         <p><strong>Note:</strong> At the Optimizing level, your focus shifts from implementing controls to driving innovation and thought leadership in digital sovereignty.</p>
     </div>';
+}
+
+$html .= '</div>';
+
+// Detailed Domain Insights section
+$html .= '<div class="section">
+    <h3>Detailed Domain Insights</h3>
+    <p style="font-size: 10pt; margin-bottom: 15px;">Review your specific responses across all domains:</p>';
+
+$hasAnyRequirements = false;
+foreach ($questions as $domainName => $domainData) {
+    $score = $domainScores[$domainName] ?? 0;
+    $responses = $domainResponses[$domainName] ?? [];
+
+    if ($score > 0) {
+        $hasAnyRequirements = true;
+        $html .= '<div style="background: #f9f9f9; padding: 12px; margin: 12px 0; border-left: 4px solid ' . $maturityColor . '; page-break-inside: avoid;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <h4 style="margin: 0; color: #333; font-size: 13pt;">' . htmlspecialchars($domainName) . '</h4>
+                <span style="background: ' . $maturityColor . '; color: white; padding: 4px 10px; border-radius: 4px; font-weight: bold; font-size: 11pt;">' . $score . '/' . count($domainData['questions']) . '</span>
+            </div>
+            <p style="margin: 8px 0; color: #666; font-size: 10pt;">' . htmlspecialchars($domainData['description']) . '</p>
+            <div style="margin-top: 10px;">
+                <strong style="font-size: 10pt; color: #333;">Requirements Identified:</strong>
+                <ul style="margin: 5px 0; padding-left: 20px;">';
+
+        foreach ($responses as $response) {
+            $html .= '<li style="margin: 4px 0; font-size: 10pt; color: #333;">' . htmlspecialchars($response) . '</li>';
+        }
+
+        $html .= '</ul>
+            </div>
+        </div>';
+    }
+}
+
+if (!$hasAnyRequirements) {
+    $html .= '<p style="padding: 15px; background: #f9f9f9; border-left: 4px solid #0066cc; margin: 10px 0; font-size: 10pt;">
+                <strong>No Digital Sovereignty requirements were identified in this assessment.</strong> Consider focusing on other value propositions.
+              </p>';
 }
 
 $html .= '</div>';
