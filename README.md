@@ -60,7 +60,6 @@ Professional PDF report with scores, domain breakdown, maturity level assessment
 
 1. **Clone the repository**:
    ```bash
-   $ cd <your working directory>
    $ git clone https://github.com/redhat-cop/viewfinder-upstream.git
    $ cd viewfinder-upstream
    ```
@@ -97,6 +96,12 @@ Professional PDF report with scores, domain breakdown, maturity level assessment
 
 2. **Install dependencies**:
    ```bash
+   composer install --no-dev --optimize-autoloader
+   ```
+
+   **Note**: If you encounter a "composer.lock does not contain valid JSON" error, the lock file may have been corrupted during file transfer. Fix it by running:
+   ```bash
+   rm composer.lock
    composer install --no-dev --optimize-autoloader
    ```
 
