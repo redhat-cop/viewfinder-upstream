@@ -87,6 +87,7 @@ Professional PDF report with scores, domain breakdown, maturity level assessment
 
 1. **Clone or extract the application**:
    ```bash
+   cd /var/www/html/viewfinder-upstream
    $ cd <your working directory>
    $ git clone https://github.com/redhat-cop/viewfinder-upstream.git
    $ # Copy files from your working directory to your apache directory
@@ -127,6 +128,21 @@ Professional PDF report with scores, domain breakdown, maturity level assessment
    ```
 
 
+1. **Build the container**:
+   ```bash
+   cd /var/www/html/viewfinder-upstream
+   podman build -t viewfinder-upstream:latest .
+   ```
+
+2. **Run the container**:
+   ```bash
+   podman run -d -p 8080:8080 --name viewfinder-upstream viewfinder-upstream:latest
+   ```
+
+3. **Access the application**:
+   ```
+   http://localhost:8080
+   ```
 
 ## Web Server Configuration
 
@@ -449,6 +465,13 @@ Apache-2.0 License - Red Hat
 
 ## Support
 
+This is a community-supported open source project. For issues, questions, or feature requests:
+
+- **GitHub Issues**: https://github.com/redhat-cop/viewfinder-upstream/issues
+- **GitHub Discussions**: https://github.com/redhat-cop/viewfinder-upstream/discussions
+- **Red Hat Community of Practice**: https://github.com/redhat-cop
+
+For enterprise support and the enhanced CMMI version, contact your Red Hat representative.
 For issues, questions, or feature requests, please refer to the main Viewfinder project documentation or contact your Red Hat representative.
 
 ## Disclaimer
