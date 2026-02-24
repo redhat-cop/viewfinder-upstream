@@ -2,17 +2,12 @@
     "name": "redhat/viewfinder-upstream",
     "description": "Viewfinder Upstream - Digital Sovereignty Readiness Assessment",
     "type": "project",
-    "license": "proprietary",
+    "license": "Apache-2.0",
     "version": "1.0.0",
     "require": {
         "php": "^8.1",
         "ext-json": "*",
         "monolog/monolog": "^3.5",
         "dompdf/dompdf": "^3.1"
-    },
-    "autoload": {
-        "psr-4": {
-            "Viewfinder\\": "includes/"
-        }
     }
 }

@@ -1,27 +1,36 @@
 # Digital Sovereignty Readiness Assessment
 
-> **Upstream, Open Source Version**
->
-> This is the upstream, open source version of the Red Hat Digital Sovereignty Readiness Assessment tool. We encourage collaboration, contributions, and community feedback to help organizations worldwide evaluate and improve their digital sovereignty posture.
+A streamlined Digital Sovereignty assessment tool focused on providing organizations with a quick and actionable readiness evaluation.
 
 ## Overview
 
-This streamlined assessment tool helps organizations evaluate their digital sovereignty readiness across 7 critical domains in just 10-15 minutes. The tool provides:
+This tool helps organizations evaluate their digital sovereignty posture across 7 critical domains in just 10-15 minutes.
 
-- **Quick Assessment**: 21 targeted questions designed for rapid evaluation
-- **4-Level Maturity Model**: Foundation, Developing, Strategic, and Advanced levels
-- **Actionable Insights**: Specific recommendations based on your maturity level
-- **PDF Reports**: Downloadable reports for stakeholders
-- **Open Source**: Community-driven development and transparency
+## Screenshots
 
-## About This Project
+### Landing Page
+The landing page features the Digital Sovereignty Readiness Assessment.
 
-This is an **upstream open source project** maintained by the Red Hat Community of Practice (CoP). The tool is designed to be:
+![Landing Page - Balanced Profile](images/screenshots/landing-page-balanced.png)
 
-- **Freely Available**: Open source under Apache 2.0 license
-- **Community-Driven**: Contributions welcome from organizations and individuals
-- **Vendor-Neutral**: Applicable to any organization, regardless of technology stack
-- **Privacy-Focused**: No data collection - all assessment data stays in your browser
+### Assessment Page
+The assessment questionnaire presents 21 questions across 7 domains with Yes/No/"Don't Know" response options. Progress is auto-saved to browser storage.
+
+![Assessment Page](images/screenshots/assessment-page.png)
+
+### Results Pages
+Comprehensive results display showing scoring, maturity level, domain analysis, and actionable recommendations.
+
+![Results Page - Overview](images/screenshots/results-page1.png)
+
+![Results Page - Domain Analysis](images/screenshots/results-page2.png)
+
+![Results Page - Recommendations](images/screenshots/results-page3.png)
+
+### PDF Report
+Professional PDF report with scores, domain breakdown, maturity level assessment, and tailored improvement actions.
+
+![PDF Report Sample](images/screenshots/pdf-report-sample.png)
 
 ## Features
 
@@ -47,6 +56,28 @@ This is an **upstream open source project** maintained by the Red Hat Community 
 
 ## Installation
 
+### Podman Installation (easiest option)
+
+1. **Clone the repository**:
+   ```bash
+   $ git clone https://github.com/redhat-cop/viewfinder-upstream.git
+   $ cd viewfinder-upstream
+   ```
+2. **Build the container**:
+   ```bash
+   podman build -t viewfinder-upstream:latest .
+   ```
+
+3. **Run the container**:
+   ```bash
+   podman run -p 8080:8080 --name viewfinder-upstream viewfinder-upstream:latest
+   ```
+
+4. **Access the application**:
+   ```
+   http://localhost:8080
+   ```
+
 ### Prerequisites
 - PHP 8.1 or higher
 - Apache or Nginx web server
@@ -57,10 +88,21 @@ This is an **upstream open source project** maintained by the Red Hat Community 
 1. **Clone or extract the application**:
    ```bash
    cd /var/www/html/viewfinder-upstream
+   $ cd <your working directory>
+   $ git clone https://github.com/redhat-cop/viewfinder-upstream.git
+   $ # Copy files from your working directory to your apache directory
+   $ cp -r viewfinder-upstream /var/www/html/
+   $ cd /var/www/html/viewfinder-upstream
    ```
 
 2. **Install dependencies**:
    ```bash
+   composer install --no-dev --optimize-autoloader
+   ```
+
+   **Note**: If you encounter a "composer.lock does not contain valid JSON" error, the lock file may have been corrupted during file transfer. Fix it by running:
+   ```bash
+   rm composer.lock
    composer install --no-dev --optimize-autoloader
    ```
 
@@ -85,7 +127,6 @@ This is an **upstream open source project** maintained by the Red Hat Community 
    http://your-server/viewfinder-upstream
    ```
 
-### Podman Installation
 
 1. **Build the container**:
    ```bash
@@ -211,6 +252,13 @@ viewfinder-upstream/
 ├── js/                          # Shared JavaScript files
 │
 ├── images/                      # Images and logos
+│   └── screenshots/             # Documentation screenshots
+│       ├── landing-page-balanced.png
+│       ├── assessment-page.png
+│       ├── results-page1.png
+│       ├── results-page2.png
+│       ├── results-page3.png
+│       └── pdf-report-sample.png
 │
 ├── error-pages/                 # Error handling pages
 │   └── error-handler.php
@@ -317,6 +365,19 @@ Edit `ds-qualifier/config.php` to customize:
 - **Session Timeout**: Automatic session expiration (1 hour)
 - **Secure File Operations**: Atomic file writes with rollback capability
 
+## Comparison with Full Viewfinder
+
+| Feature | Full Viewfinder | Viewfinder Lite |
+|---------|----------------|-----------------|
+| Profile Management | ✓ | ✗ |
+| Full Maturity Assessments | ✓ | ✗ |
+| Readiness Assessment | ✓ | ✓ |
+| Digital Sovereignty Quiz | ✓ | ✗ |
+| Operation Sovereign Shield | ✓ | ✗ |
+| Compliance Framework Mapping | ✓ | ✗ |
+| Line of Business Content | ✓ | ✗ |
+| Approximate Size | ~100+ MB | ~60-65 MB |
+
 ## Troubleshooting
 
 ### Common Issues
@@ -398,46 +459,9 @@ Edit `ds-qualifier/results.php` to adjust:
 - Maturity level names
 - Recommendations per level
 
-## Contributing
-
-We welcome contributions from the community! This is an open source project and we encourage:
-
-### Ways to Contribute
-
-- **Report Issues**: Found a bug? [Open an issue](https://github.com/redhat-cop/viewfinder-upstream/issues)
-- **Suggest Features**: Have ideas for improvements? We'd love to hear them
-- **Submit Pull Requests**: Code contributions are welcome
-  - Add new questions or refine existing ones
-  - Improve maturity level descriptions
-  - Enhance the user interface
-  - Fix bugs or improve performance
-  - Translate to other languages
-- **Share Feedback**: Help us improve by sharing your assessment experience
-- **Contribute Domain Expertise**: Help refine questions and recommendations for specific domains
-
-### Contribution Guidelines
-
-1. **Fork the repository** and create a feature branch
-2. **Make your changes** with clear, descriptive commit messages
-3. **Test thoroughly** to ensure nothing breaks
-4. **Submit a pull request** with a description of your changes
-5. **Engage in discussion** - we'll review and provide feedback
-
-### Code of Conduct
-
-This project follows the [Red Hat Community of Practice Code of Conduct](https://github.com/redhat-cop). We are committed to providing a welcoming and inclusive environment for all contributors.
-
-### Questions?
-
-- **GitHub Discussions**: Ask questions and discuss ideas
-- **GitHub Issues**: Report bugs and request features
-- **Community**: Join the Red Hat Community of Practice
-
 ## License
 
 Apache-2.0 License - Red Hat
-
-This project is licensed under the Apache License 2.0. See the LICENSE file for details.
 
 ## Support
 
@@ -448,10 +472,11 @@ This is a community-supported open source project. For issues, questions, or fea
 - **Red Hat Community of Practice**: https://github.com/redhat-cop
 
 For enterprise support and the enhanced CMMI version, contact your Red Hat representative.
+For issues, questions, or feature requests, please refer to the main Viewfinder project documentation or contact your Red Hat representative.
 
 ## Disclaimer
 
-This Digital Sovereignty Readiness Assessment Tool is provided by Red Hat for informational purposes only to help organizations review their general sovereign posture. It cannot be used to validate an organization's compliance with any specific sovereignty requirements. It is not endorsed by any regulatory authority, and its findings or recommendations do not constitute legal advice. Red Hat bears no legal responsibility or liability for the results or its use. No identity data will be collected or saved.
+This application is provided for informational purposes only. The information is provided "as is" with no guarantee or warranty of accuracy, completeness, or fitness for a particular purpose. Users should conduct their own validation and testing before relying on assessment results for decision-making.
 
 ---
 
