@@ -180,12 +180,6 @@
 </head>
 
 <body>
-  <header class="pf-c-page__header">
-    <div class="pf-c-page__header-brand">
-      <div class="pf-c-page__header-brand-toggle"></div>
-   </div>
-  </header>
-
   <div class="landing-page-wrapper">
     <div class="container" style="max-width: 1200px; margin: 2rem auto; padding: 4rem 2rem 0 2rem;">
       <div style="text-align: center; margin-bottom: 0;">
