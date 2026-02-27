@@ -50,11 +50,42 @@
     <?php
     // Load questions configuration
     $questions = require_once 'config.php';
+
+    // Load profiles and capture selected profile
+    $profiles = require_once 'profiles.php';
+    $selectedProfile = isset($_GET['profile']) ? $_GET['profile'] : 'balanced';
+
+    // Validate profile exists
+    if (!isset($profiles[$selectedProfile])) {
+        $selectedProfile = 'balanced';
+    }
+
+    $profileData = $profiles[$selectedProfile];
+
+    // Handle custom weights if custom profile is selected
+    $customWeights = [];
+    if ($selectedProfile === 'custom') {
+        foreach ($questions as $domainName => $domainData) {
+            $paramName = 'weight_' . str_replace(' ', '_', $domainName);
+            if (isset($_GET[$paramName])) {
+                $weight = floatval($_GET[$paramName]);
+                // Validate weight is between 1.0 and 2.0
+                $customWeights[$domainName] = max(1.0, min(2.0, $weight));
+            } else {
+                $customWeights[$domainName] = 1.0;
+            }
+        }
+    }
     ?>
 
     <div class="qualifier-header">
       <h1><i class="fa-solid fa-clipboard-check"></i> Digital Sovereignty Readiness Assessment</h1>
       <p class="subtitle">Quick 10-15 minute assessment to evaluate digital sovereignty readiness</p>
+      <div style="text-align: center; margin-top: 1rem; padding: 0.75rem; background: #1a1a1a; border-radius: 4px; border-left: 3px solid #0d60f8;">
+        <i class="fa-solid <?php echo htmlspecialchars($profileData['icon']); ?>" style="color: #0d60f8; margin-right: 0.5rem;"></i>
+        <strong style="color: #9ec7fc;">Profile:</strong>
+        <span style="color: #ccc;"><?php echo htmlspecialchars($profileData['name']); ?></span>
+      </div>
     </div>
 
     <div class="qualifier-intro" id="intro-section">
@@ -70,6 +101,16 @@
     </div>
 
     <form action="results.php" method="POST" id="qualifier-form">
+      <!-- Pass selected profile to results page -->
+      <input type="hidden" name="profile" value="<?php echo htmlspecialchars($selectedProfile); ?>">
+
+      <!-- Pass custom weights if using custom profile -->
+      <?php if ($selectedProfile === 'custom'): ?>
+        <?php foreach ($customWeights as $domain => $weight): ?>
+          <input type="hidden" name="custom_weight_<?php echo htmlspecialchars(str_replace(' ', '_', $domain)); ?>" value="<?php echo htmlspecialchars($weight); ?>">
+        <?php endforeach; ?>
+      <?php endif; ?>
+
       <!-- Domain Questions -->
       <?php
       $sectionIndex = 0;

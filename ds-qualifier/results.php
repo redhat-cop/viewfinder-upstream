@@ -61,11 +61,47 @@
     // Load questions configuration for domain mapping
     $questions = require_once 'config.php';
 
+    // Load profiles and get selected profile
+    $profiles = require_once 'profiles.php';
+    $selectedProfile = isset($_POST['profile']) ? $_POST['profile'] : 'balanced';
+
+    // Validate profile exists
+    if (!isset($profiles[$selectedProfile])) {
+        $selectedProfile = 'balanced';
+    }
+
+    $profileData = $profiles[$selectedProfile];
+
+    // Handle custom weights if custom profile is selected
+    if ($selectedProfile === 'custom') {
+        $domainWeights = [];
+        foreach ($questions as $domainName => $domainData) {
+            $paramName = 'custom_weight_' . str_replace(' ', '_', $domainName);
+            if (isset($_POST[$paramName])) {
+                $weight = floatval($_POST[$paramName]);
+                // Validate weight is between 1.0 and 2.0
+                $domainWeights[$domainName] = max(1.0, min(2.0, $weight));
+            } else {
+                $domainWeights[$domainName] = 1.0;
+            }
+        }
+        // Update profile data description for custom
+        if (array_sum($domainWeights) == count($domainWeights)) {
+            $profileData['description'] = 'Custom profile with balanced weighting (all domains set to 1.0×)';
+        } else {
+            $profileData['description'] = 'Custom profile with user-defined domain weightings';
+        }
+    } else {
+        $domainWeights = $profileData['weights'];
+    }
+
     // Initialize scoring arrays
     $totalScore = 0;
+    $weightedScore = 0;
     $maxScore = 21;
     $domainScores = [];
     $domainMaxScores = [];
+    $domainWeightedScores = [];
     $domainResponses = [];
     $unknownQuestions = []; // Track "Don't Know" responses
 
@@ -78,7 +114,7 @@
         $domainResponses[$domainName] = [];
     }
 
-    // Calculate scores
+    // Calculate scores (both raw and weighted)
     foreach ($_POST as $key => $value) {
         // Match question IDs (ds1, ts1, os1, etc.)
         if (preg_match('/^(ds|ts|os|as|oss|eo|ms)\d+$/', $key)) {
@@ -110,31 +146,62 @@
         }
     }
 
-    // Determine maturity level based on total score (4-level system)
-    if ($totalScore <= 5) {
-        $maturityLevel = 'Foundation';
-        $priorityClass = 'maturity-foundation';
-        $priorityIcon = 'fa-seedling';
-        $recommendation = 'Foundation Level';
-        $recommendationDetail = 'Your organization is in the early stages of digital sovereignty readiness. Focus on building awareness, assessing current dependencies, and establishing basic policies and governance structures.';
-    } elseif ($totalScore <= 10) {
-        $maturityLevel = 'Developing';
-        $priorityClass = 'maturity-developing';
-        $priorityIcon = 'fa-arrow-trend-up';
-        $recommendation = 'Developing Level';
-        $recommendationDetail = 'Your organization is actively building digital sovereignty capabilities. Continue implementing controls, developing strategies, and expanding capabilities across key domains.';
-    } elseif ($totalScore <= 16) {
-        $maturityLevel = 'Strategic';
-        $priorityClass = 'maturity-strategic';
+    // Calculate weighted scores per domain
+    $totalWeight = 0;
+    $weightedSum = 0;
+
+    foreach ($domainScores as $domainName => $score) {
+        $maxForDomain = $domainMaxScores[$domainName];
+        $weight = $domainWeights[$domainName] ?? 1.0;
+
+        // Calculate percentage for this domain (0-100%)
+        $domainPercentage = $maxForDomain > 0 ? ($score / $maxForDomain) : 0;
+
+        // Apply weight
+        $weightedDomainScore = $domainPercentage * $weight;
+        $domainWeightedScores[$domainName] = $weightedDomainScore;
+
+        $weightedSum += $weightedDomainScore;
+        $totalWeight += $weight;
+    }
+
+    // Normalize weighted score to 0-21 scale
+    $weightedScore = $totalWeight > 0 ? ($weightedSum / $totalWeight) * 21 : 0;
+
+    // Determine maturity level based on WEIGHTED score (CMMI 5-level system)
+    // Initial: 0-20% (0-4.2 points), Managed: 21-40% (4.21-8.4 points)
+    // Defined: 41-60% (8.41-12.6 points), Quantitatively Managed: 61-80% (12.61-16.8 points)
+    // Optimizing: 81-100% (16.81-21 points)
+    if ($weightedScore <= 4.2) {
+        $maturityLevel = 'Initial';
+        $priorityClass = 'maturity-initial';
+        $priorityIcon = 'fa-circle-exclamation';
+        $recommendation = 'Initial Level';
+        $recommendationDetail = 'Processes are unpredictable, poorly controlled, and reactive. Your organization has ad-hoc digital sovereignty practices with significant dependencies on external providers. Success depends on individual heroics rather than proven processes.';
+    } elseif ($weightedScore <= 8.4) {
+        $maturityLevel = 'Managed';
+        $priorityClass = 'maturity-managed';
+        $priorityIcon = 'fa-clipboard-list';
+        $recommendation = 'Managed Level';
+        $recommendationDetail = 'Projects are planned and executed in accordance with policy. Your organization manages digital sovereignty requirements at the project level, but processes may not be repeatable across the organization. Basic controls are in place but not yet standardized.';
+    } elseif ($weightedScore <= 12.6) {
+        $maturityLevel = 'Defined';
+        $priorityClass = 'maturity-defined';
+        $priorityIcon = 'fa-sitemap';
+        $recommendation = 'Defined Level';
+        $recommendationDetail = 'Processes are well characterized, understood, and proactive. Your organization has documented and standardized digital sovereignty processes across all domains. Practices are consistent and repeatable, with clear governance structures in place.';
+    } elseif ($weightedScore <= 16.8) {
+        $maturityLevel = 'Quantitatively Managed';
+        $priorityClass = 'maturity-quantitative';
         $priorityIcon = 'fa-chart-line';
-        $recommendation = 'Strategic Level';
-        $recommendationDetail = 'Your organization has established strong digital sovereignty capabilities. Focus on standardization, advanced controls, and organization-wide consistency.';
+        $recommendation = 'Quantitatively Managed Level';
+        $recommendationDetail = 'Processes are measured and controlled using quantitative data. Your organization manages digital sovereignty with statistical and analytical techniques, establishing quantitative objectives for quality and performance. Variations in process performance are understood and controlled.';
     } else {
-        $maturityLevel = 'Advanced';
-        $priorityClass = 'maturity-advanced';
-        $priorityIcon = 'fa-shield-halved';
-        $recommendation = 'Advanced Level';
-        $recommendationDetail = 'Your organization demonstrates advanced digital sovereignty capabilities across all domains. Continue maintaining excellence and stay ahead of evolving regulatory and geopolitical requirements.';
+        $maturityLevel = 'Optimizing';
+        $priorityClass = 'maturity-optimizing';
+        $priorityIcon = 'fa-rocket';
+        $recommendation = 'Optimizing Level';
+        $recommendationDetail = 'Focus is on continuous improvement and innovation. Your organization continuously improves digital sovereignty processes based on quantitative understanding. You are proactive in identifying and deploying innovative practices, maintaining industry-leading sovereignty posture.';
     }
 
     $assessmentDate = date('F j, Y \a\t g:i A');
@@ -144,6 +211,16 @@
     <div class="results-header">
       <h1><i class="fa-solid fa-chart-bar"></i> Digital Sovereignty Readiness Assessment Results</h1>
       <p class="assessment-date"><strong>Assessment Date:</strong> <?php echo $assessmentDate; ?></p>
+
+      <!-- Profile Information -->
+      <div style="text-align: center; margin-top: 1rem; padding: 1rem; background: #1a1a1a; border-radius: 4px; border: 1px solid #444;">
+        <i class="fa-solid <?php echo htmlspecialchars($profileData['icon']); ?>" style="color: #0d60f8; margin-right: 0.5rem; font-size: 1.2rem;"></i>
+        <strong style="color: #9ec7fc; font-size: 1.1rem;">Profile:</strong>
+        <span style="color: #fff; font-size: 1.1rem; margin-left: 0.5rem;"><?php echo htmlspecialchars($profileData['name']); ?></span>
+        <p style="color: #999; margin: 0.5rem 0 0 0; font-size: 0.9rem;">
+          <?php echo htmlspecialchars($profileData['description']); ?>
+        </p>
+      </div>
     </div>
 
     <!-- Score Card -->
@@ -154,8 +231,8 @@
       <h2><?php echo $maturityLevel; ?> Maturity Level</h2>
 
       <?php
-      // Calculate percentage for visual display (based on total score)
-      $scorePercentage = round(($totalScore / $maxScore) * 100);
+      // Calculate percentage for visual display (based on weighted score)
+      $scorePercentage = round(($weightedScore / $maxScore) * 100);
       ?>
 
       <div class="score-visual-container">
@@ -171,7 +248,9 @@
           <div class="progress-text">
             <div class="percentage-display"><?php echo $scorePercentage; ?>%</div>
             <div class="score-detail">
-              <strong><?php echo $totalScore; ?></strong> of <?php echo $maxScore; ?> points
+              <strong><?php echo number_format($weightedScore, 1); ?></strong> of <?php echo $maxScore; ?> points
+              <br>
+              <span style="font-size: 0.8rem; color: #999;">(Raw: <?php echo $totalScore; ?> pts)</span>
             </div>
           </div>
         </div>
@@ -185,6 +264,10 @@
     <div class="domain-breakdown">
       <h2><i class="fa-solid fa-table"></i> Domain Analysis</h2>
       <p class="section-intro">Breakdown of your readiness across the 7 Digital Sovereignty domains:</p>
+      <p class="section-intro" style="font-size: 0.9rem; color: #999; font-style: italic;">
+        <i class="fa-solid fa-info-circle"></i> Weights reflect the importance of each domain for the <strong><?php echo htmlspecialchars($profileData['name']); ?></strong> profile.
+        Domains with higher weights (≥1.5×) contribute more to your overall score.
+      </p>
 
       <div class="domain-table-wrapper">
         <table class="domain-table">
@@ -192,6 +275,7 @@
             <tr>
               <th>Domain</th>
               <th style="text-align: center;">Score</th>
+              <th style="text-align: center;">Weight</th>
               <th style="text-align: center;">Progress</th>
               <th>Maturity Level</th>
             </tr>
@@ -202,30 +286,41 @@
                 $score = $domainScores[$domainName] ?? 0;
                 $maxDomainScore = count($domainData['questions']);
                 $percentage = ($score / $maxDomainScore) * 100;
+                $weight = $domainWeights[$domainName] ?? 1.0;
 
-                // Maturity levels based on score percentage (4-level system)
-                if ($percentage == 0) {
-                    $strengthClass = 'strength-foundation';
-                    $strengthIcon = 'fa-seedling';
-                    $strengthText = 'Foundation';
-                } elseif ($percentage <= 33) {
-                    $strengthClass = 'strength-developing';
-                    $strengthIcon = 'fa-arrow-trend-up';
-                    $strengthText = 'Developing';
-                } elseif ($percentage <= 67) {
-                    $strengthClass = 'strength-strategic';
+                // Maturity levels based on score percentage (CMMI 5-level system)
+                // Initial: 0-20%, Managed: 21-40%, Defined: 41-60%, Quantitatively Managed: 61-80%, Optimizing: 81-100%
+                if ($percentage <= 20) {
+                    $strengthClass = 'strength-initial';
+                    $strengthIcon = 'fa-circle-exclamation';
+                    $strengthText = 'Initial';
+                } elseif ($percentage <= 40) {
+                    $strengthClass = 'strength-managed';
+                    $strengthIcon = 'fa-clipboard-list';
+                    $strengthText = 'Managed';
+                } elseif ($percentage <= 60) {
+                    $strengthClass = 'strength-defined';
+                    $strengthIcon = 'fa-sitemap';
+                    $strengthText = 'Defined';
+                } elseif ($percentage <= 80) {
+                    $strengthClass = 'strength-quantitative';
                     $strengthIcon = 'fa-chart-line';
-                    $strengthText = 'Strategic';
+                    $strengthText = 'Quantitatively Managed';
                 } else {
-                    $strengthClass = 'strength-advanced';
-                    $strengthIcon = 'fa-shield-halved';
-                    $strengthText = 'Advanced';
+                    $strengthClass = 'strength-optimizing';
+                    $strengthIcon = 'fa-rocket';
+                    $strengthText = 'Optimizing';
                 }
             ?>
               <tr>
                 <td><strong><?php echo htmlspecialchars($domainName); ?></strong></td>
                 <td style="text-align: center;">
                   <span class="domain-score-cell"><?php echo $score; ?>/<?php echo $maxDomainScore; ?></span>
+                </td>
+                <td style="text-align: center;">
+                  <span class="weight-badge" style="display: inline-block; padding: 0.25rem 0.75rem; background: <?php echo $weight >= 1.5 ? 'linear-gradient(135deg, #f0ab00 0%, #c58c00 100%)' : '#1a1a1a'; ?>; border: 1px solid #444; border-radius: 4px; font-weight: 600; color: <?php echo $weight >= 1.5 ? '#fff' : '#9ec7fc'; ?>;">
+                    <?php echo number_format($weight, 1); ?>×
+                  </span>
                 </td>
                 <td style="text-align: center;">
                   <span class="progress-bar-wrapper">
@@ -299,14 +394,14 @@
     <div class="improvement-actions">
       <h2><i class="fa-solid fa-bullseye"></i> Recommended Improvement Actions</h2>
 
-      <?php if ($maturityLevel === 'Foundation'): ?>
-        <div class="action-priority maturity-foundation">
-          <h3><i class="fa-solid fa-seedling"></i> Foundation Level Actions</h3>
-          <p>Build foundational digital sovereignty awareness and establish initial governance:</p>
+      <?php if ($maturityLevel === 'Initial'): ?>
+        <div class="action-priority maturity-initial">
+          <h3><i class="fa-solid fa-circle-exclamation"></i> Critical Actions for Initial Level</h3>
+          <p>Processes are unpredictable and reactive. Establish basic digital sovereignty awareness and controls:</p>
           <ul>
             <li><strong>Gain Executive Awareness:</strong> Educate leadership on digital sovereignty risks and regulatory requirements</li>
             <li><strong>Assess Current State:</strong> Conduct inventory of data locations, vendor dependencies, and compliance gaps</li>
-            <li><strong>Identify Quick Wins:</strong> Address immediate sovereignty risks (e.g., data residency violations)</li>
+            <li><strong>Identify Quick Wins:</strong> Address immediate sovereignty risks (e.g., data residency violations, unencrypted data)</li>
             <li><strong>Secure Resources:</strong> Obtain initial budget and staffing for sovereignty initiatives</li>
             <li><strong>Define Initial Policies:</strong> Create basic policies for data handling and vendor selection</li>
             <li><strong>Build Awareness:</strong> Launch awareness campaigns to educate staff about digital sovereignty</li>
@@ -323,10 +418,10 @@
           </div>
         </div>
 
-      <?php elseif ($maturityLevel === 'Developing'): ?>
-        <div class="action-priority maturity-developing">
-          <h3><i class="fa-solid fa-arrow-trend-up"></i> Developing Level Actions</h3>
-          <p>Build capabilities and implement controls across key domains:</p>
+      <?php elseif ($maturityLevel === 'Managed'): ?>
+        <div class="action-priority maturity-managed">
+          <h3><i class="fa-solid fa-clipboard-list"></i> Foundation Actions for Managed Level</h3>
+          <p>Projects are managed but processes are not yet standardized. Build repeatable practices:</p>
           <ul>
             <li><strong>Develop Strategy:</strong> Create a digital sovereignty roadmap aligned with business objectives</li>
             <li><strong>Implement Controls:</strong> Deploy encryption key management (BYOK/HYOK) and data residency controls</li>
@@ -347,10 +442,10 @@
           </div>
         </div>
 
-      <?php elseif ($maturityLevel === 'Strategic'): ?>
-        <div class="action-priority maturity-strategic">
-          <h3><i class="fa-solid fa-chart-line"></i> Strategic Level Actions</h3>
-          <p>Standardize processes and pursue organization-wide consistency:</p>
+      <?php elseif ($maturityLevel === 'Defined'): ?>
+        <div class="action-priority maturity-defined">
+          <h3><i class="fa-solid fa-sitemap"></i> Standardization Actions for Defined Level</h3>
+          <p>Processes are documented and standardized. Focus on organization-wide consistency and optimization:</p>
           <ul>
             <li><strong>Standardize Processes:</strong> Ensure sovereignty practices are consistent across all business units</li>
             <li><strong>Implement Standards:</strong> Adopt open standards and containerization for portability</li>
@@ -371,20 +466,44 @@
           </div>
         </div>
 
+      <?php elseif ($maturityLevel === 'Quantitatively Managed'): ?>
+        <div class="action-priority maturity-quantitative">
+          <h3><i class="fa-solid fa-chart-line"></i> Measurement Actions for Quantitatively Managed Level</h3>
+          <p>Processes are measured and statistically controlled. Optimize through data-driven decisions:</p>
+          <ul>
+            <li><strong>Establish Metrics:</strong> Define and track quantitative sovereignty performance indicators</li>
+            <li><strong>Analyze Performance:</strong> Use statistical techniques to understand process variations</li>
+            <li><strong>Set Objectives:</strong> Establish quantitative quality and performance targets for sovereignty</li>
+            <li><strong>Validate Controls:</strong> Regularly test and measure effectiveness of sovereignty controls</li>
+            <li><strong>Benchmark Performance:</strong> Compare your metrics against industry standards and peers</li>
+            <li><strong>Optimize Resources:</strong> Use data to identify and eliminate inefficiencies</li>
+          </ul>
+
+          <div class="recommended-resources">
+            <h4>Excellence Focus:</h4>
+            <ul>
+              <li>Advanced analytics and metrics dashboards</li>
+              <li>Statistical process control techniques</li>
+              <li>Continuous monitoring and alerting</li>
+              <li>Performance baselines and targets</li>
+            </ul>
+          </div>
+        </div>
+
       <?php else: ?>
-        <div class="action-priority maturity-advanced">
-          <h3><i class="fa-solid fa-shield-halved"></i> Advanced Level Actions</h3>
-          <p>Drive innovation and thought leadership in digital sovereignty:</p>
+        <div class="action-priority maturity-optimizing">
+          <h3><i class="fa-solid fa-rocket"></i> Innovation Actions for Optimizing Level</h3>
+          <p>Focus on continuous improvement and innovation. Lead industry best practices:</p>
           <ul>
             <li><strong>Drive Innovation:</strong> Pilot and deploy innovative sovereignty technologies and practices</li>
-            <li><strong>Continuous Improvement:</strong> Continuously optimize processes and capabilities</li>
+            <li><strong>Continuous Improvement:</strong> Use quantitative feedback to continuously optimize processes</li>
             <li><strong>Share Knowledge:</strong> Document and share best practices with industry and open-source communities</li>
             <li><strong>Lead Standards:</strong> Contribute to and influence digital sovereignty standards and frameworks</li>
             <li><strong>Expand Scope:</strong> Apply sovereignty principles to emerging technologies (AI, edge, quantum)</li>
             <li><strong>Stay Ahead:</strong> Proactively monitor and adapt to evolving regulations and geopolitical changes</li>
           </ul>
 
-          <p class="note"><strong>Note:</strong> At the Advanced level, your focus shifts to driving innovation and thought leadership in digital sovereignty. Continue to measure, refine, and lead industry practices.</p>
+          <p class="note"><strong>Note:</strong> At the Optimizing level, your focus shifts from implementing controls to driving innovation and thought leadership in digital sovereignty. Continue to measure, refine, and lead industry practices.</p>
         </div>
       <?php endif; ?>
     </div>
