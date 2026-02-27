@@ -4,29 +4,14 @@ A streamlined Digital Sovereignty assessment tool focused on providing organizat
 
 ## Overview
 
-This upstream "Digital Sovereignty Readiness Assessment" is a tool to help organizations evaluate their digital sovereignty posture across 7 critical domains in just 10-15 minutes.
+This tool helps organizations evaluate their digital sovereignty posture across 7 critical domains in just 10-15 minutes.
 
 ## Screenshots
 
-### Landing Page - Balanced Profile
-The landing page features a profile selector with real-time domain weight visualization. The Balanced profile shows equal weighting across all domains.
+### Landing Page
+The landing page features the Digital Sovereignty Readiness Assessment.
 
 ![Landing Page - Balanced Profile](images/screenshots/landing-page-balanced.png)
-
-### Landing Page - Custom Profile
-The Custom profile option allows users to adjust domain weights from 1.0× to 2.0× using interactive sliders, with real-time visualization updates.
-
-![Landing Page - Custom Profile](images/screenshots/landing-page-custom.png)
-
-### Landing Page - Financial Services Profile
-The Financial Services profile demonstrates industry-specific weighting with critical emphasis on Data Sovereignty (2.0×) and Assurance Sovereignty (2.0×) to address regulatory requirements like PCI DSS and audit controls.
-
-![Landing Page - Financial Services Profile](images/screenshots/landing-page-financial.png)
-
-### CMMI Maturity Levels
-The five CMMI maturity levels (Initial, Managed, Defined, Quantitatively Managed, Optimizing) provide a framework for evaluating digital sovereignty readiness with color-coded indicators and percentage ranges.
-
-![CMMI Maturity Levels](images/screenshots/cmmi-levels.png)
 
 ### Assessment Page
 The assessment questionnaire presents 21 questions across 7 domains with Yes/No/"Don't Know" response options. Progress is auto-saved to browser storage.
@@ -34,7 +19,7 @@ The assessment questionnaire presents 21 questions across 7 domains with Yes/No/
 ![Assessment Page](images/screenshots/assessment-page.png)
 
 ### Results Pages
-Comprehensive results display showing weighted scoring, maturity level, domain analysis, and actionable recommendations.
+Comprehensive results display showing scoring, maturity level, domain analysis, and actionable recommendations.
 
 ![Results Page - Overview](images/screenshots/results-page1.png)
 
@@ -43,7 +28,7 @@ Comprehensive results display showing weighted scoring, maturity level, domain a
 ![Results Page - Recommendations](images/screenshots/results-page3.png)
 
 ### PDF Report
-Professional PDF report with weighted scores, domain breakdown, maturity level assessment, and tailored improvement actions.
+Professional PDF report with scores, domain breakdown, maturity level assessment, and tailored improvement actions.
 
 ![PDF Report Sample](images/screenshots/pdf-report-sample.png)
 
@@ -61,18 +46,37 @@ Professional PDF report with weighted scores, domain breakdown, maturity level a
   - Managed Services
 - **21 Key Questions**: 2-3 targeted questions per domain
 - **Multiple Response Options**: Yes/No/"Don't Know" format
-- **Industry-Specific Profiles**: 8 pre-configured weighting profiles tailored to different sectors
-- **Custom Weighting**: Adjustable domain weights (1.0× to 2.0×) for personalized assessments
-- **Weighted Scoring**: Intelligent scoring that prioritizes critical domains based on selected profile
 - **Instant Scoring**: Real-time maturity level calculation
-- **Maturity Levels**: CMMI-aligned 5-level model (Initial, Managed, Defined, Quantitatively Managed, Optimizing)
+- **Maturity Levels**: Foundation, Developing, Strategic, Advanced
 - **Actionable Recommendations**: Tailored guidance based on assessment results
 - **Research Questions**: Track "Don't Know" responses for follow-up investigation
-- **PDF Export**: Professional downloadable reports with profile information
+- **PDF Export**: Professional downloadable reports
 - **Progress Auto-Save**: Browser-based session persistence
 - **Keyboard Navigation**: Arrow keys for quick navigation, Ctrl+S to save
 
 ## Installation
+
+### Podman Installation (easiest option)
+
+1. **Clone the repository**:
+   ```bash
+   $ git clone https://github.com/redhat-cop/viewfinder-upstream.git
+   $ cd viewfinder-upstream
+   ```
+2. **Build the container**:
+   ```bash
+   podman build -t viewfinder-upstream:latest .
+   ```
+
+3. **Run the container**:
+   ```bash
+   podman run -p 8080:8080 --name viewfinder-upstream viewfinder-upstream:latest
+   ```
+
+4. **Access the application**:
+   ```
+   http://localhost:8080
+   ```
 
 ### Prerequisites
 - PHP 8.1 or higher
@@ -83,7 +87,12 @@ Professional PDF report with weighted scores, domain breakdown, maturity level a
 
 1. **Clone or extract the application**:
    ```bash
-   cd /var/www/html/viewfinder-lite
+   cd /var/www/html/viewfinder-upstream
+   $ cd <your working directory>
+   $ git clone https://github.com/redhat-cop/viewfinder-upstream.git
+   $ # Copy files from your working directory to your apache directory
+   $ cp -r viewfinder-upstream /var/www/html/
+   $ cd /var/www/html/viewfinder-upstream
    ```
 
 2. **Install dependencies**:
@@ -91,17 +100,23 @@ Professional PDF report with weighted scores, domain breakdown, maturity level a
    composer install --no-dev --optimize-autoloader
    ```
 
+   **Note**: If you encounter a "composer.lock does not contain valid JSON" error, the lock file may have been corrupted during file transfer. Fix it by running:
+   ```bash
+   rm composer.lock
+   composer install --no-dev --optimize-autoloader
+   ```
+
 3. **Set file permissions**:
    ```bash
    # Set ownership (adjust user/group for your system)
-   sudo chown -R apache:apache /var/www/html/viewfinder-lite
+   sudo chown -R apache:apache /var/www/html/viewfinder-upstream
 
    # Set directory permissions
-   sudo chmod 755 /var/www/html/viewfinder-lite
-   sudo chmod 775 /var/www/html/viewfinder-lite/logs
+   sudo chmod 755 /var/www/html/viewfinder-upstream
+   sudo chmod 775 /var/www/html/viewfinder-upstream/logs
 
    # Set file permissions
-   find /var/www/html/viewfinder-lite -type f -exec chmod 644 {} \;
+   find /var/www/html/viewfinder-upstream -type f -exec chmod 644 {} \;
    ```
 
 4. **Configure web server**:
@@ -109,20 +124,19 @@ Professional PDF report with weighted scores, domain breakdown, maturity level a
 
 5. **Access the application**:
    ```
-   http://your-server/viewfinder-lite
+   http://your-server/viewfinder-upstream
    ```
 
-### Podman Installation
 
 1. **Build the container**:
    ```bash
-   cd /var/www/html/viewfinder-lite
-   podman build -t viewfinder-lite:latest .
+   cd /var/www/html/viewfinder-upstream
+   podman build -t viewfinder-upstream:latest .
    ```
 
 2. **Run the container**:
    ```bash
-   podman run -d -p 8080:8080 --name viewfinder-lite viewfinder-lite:latest
+   podman run -d -p 8080:8080 --name viewfinder-upstream viewfinder-upstream:latest
    ```
 
 3. **Access the application**:
@@ -134,13 +148,13 @@ Professional PDF report with weighted scores, domain breakdown, maturity level a
 
 ### Apache Configuration
 
-**VirtualHost Example** (`/etc/httpd/conf.d/viewfinder-lite.conf`):
+**VirtualHost Example** (`/etc/httpd/conf.d/viewfinder-upstream.conf`):
 ```apache
 <VirtualHost *:80>
-    ServerName viewfinder-lite.example.com
-    DocumentRoot /var/www/html/viewfinder-lite
+    ServerName viewfinder-upstream.example.com
+    DocumentRoot /var/www/html/viewfinder-upstream
 
-    <Directory /var/www/html/viewfinder-lite>
+    <Directory /var/www/html/viewfinder-upstream>
         Options -Indexes +FollowSymLinks
         AllowOverride All
         Require all granted
@@ -152,19 +166,19 @@ Professional PDF report with weighted scores, domain breakdown, maturity level a
     </Directory>
 
     # Logging
-    ErrorLog /var/log/httpd/viewfinder-lite-error.log
-    CustomLog /var/log/httpd/viewfinder-lite-access.log combined
+    ErrorLog /var/log/httpd/viewfinder-upstream-error.log
+    CustomLog /var/log/httpd/viewfinder-upstream-access.log combined
 </VirtualHost>
 ```
 
 ### Nginx Configuration
 
-**Server Block Example** (`/etc/nginx/conf.d/viewfinder-lite.conf`):
+**Server Block Example** (`/etc/nginx/conf.d/viewfinder-upstream.conf`):
 ```nginx
 server {
     listen 80;
-    server_name viewfinder-lite.example.com;
-    root /var/www/html/viewfinder-lite;
+    server_name viewfinder-upstream.example.com;
+    root /var/www/html/viewfinder-upstream;
     index index.php;
 
     # Security headers
@@ -189,15 +203,15 @@ server {
     }
 
     # Logging
-    access_log /var/log/nginx/viewfinder-lite-access.log;
-    error_log /var/log/nginx/viewfinder-lite-error.log;
+    access_log /var/log/nginx/viewfinder-upstream-access.log;
+    error_log /var/log/nginx/viewfinder-upstream-error.log;
 }
 ```
 
 ## File Structure
 
 ```
-viewfinder-lite/
+viewfinder-upstream/
 ├── index.php                    # Landing page
 ├── composer.json                # PHP dependencies
 ├── composer.lock                # Dependency lock file
@@ -210,7 +224,6 @@ viewfinder-lite/
 │   ├── index.php               # Assessment questionnaire interface
 │   ├── results.php             # Results and recommendations page
 │   ├── config.php              # Questions configuration
-│   ├── profiles.php            # Weighting profiles (industry-specific)
 │   ├── generate-pdf.php        # PDF report generator
 │   ├── css/
 │   │   └── ds-qualifier.css    # Assessment-specific styles
@@ -226,8 +239,7 @@ viewfinder-lite/
 │       ├── FileSystemException.php
 │       ├── DataValidationException.php
 │       ├── ConfigurationException.php
-│       ├── ViewfinderJsonException.php
-│       └── ProfileException.php
+│       └── ViewfinderJsonException.php
 │
 ├── css/                         # Shared stylesheets
 │   ├── bootstrap.min.css       # Bootstrap framework
@@ -242,9 +254,6 @@ viewfinder-lite/
 ├── images/                      # Images and logos
 │   └── screenshots/             # Documentation screenshots
 │       ├── landing-page-balanced.png
-│       ├── landing-page-custom.png
-│       ├── landing-page-financial.png
-│       ├── cmmi-levels.png
 │       ├── assessment-page.png
 │       ├── results-page1.png
 │       ├── results-page2.png
@@ -264,134 +273,51 @@ viewfinder-lite/
 ### Landing Page
 Navigate to the root URL to access the landing page featuring the Digital Sovereignty Readiness Assessment card.
 
-### Selecting a Profile
-
-Before starting the assessment, choose a weighting profile that matches your organization's industry and priorities:
-
-#### Available Profiles
-
-1. **Balanced** (Default)
-   - Equal weighting across all domains
-   - Ideal for general assessments or organizations starting their digital sovereignty journey
-
-2. **Financial Services**
-   - Emphasizes Data Sovereignty (2.0×) and Assurance Sovereignty (2.0×)
-   - Tailored for banking, finance, and payment processing organizations
-   - Addresses PCI DSS, anti-money laundering, and regulatory audit requirements
-
-3. **Healthcare**
-   - Prioritizes Data Sovereignty (2.0×) and Operational Sovereignty (2.0×)
-   - Designed for hospitals, clinics, and health data processors
-   - Addresses HIPAA, patient data protection, and life-critical system availability
-
-4. **Government & Public Sector**
-   - High weighting across Data (2.0×), Assurance (2.0×), and Executive Oversight (2.0×)
-   - For government agencies and public sector organizations
-   - Addresses NIS2, FedRAMP, and national security requirements
-
-5. **Technology & SaaS**
-   - Focuses on Technical Sovereignty (2.0×) and Open Source (2.0×)
-   - For software companies, SaaS providers, and tech startups
-   - Emphasizes vendor lock-in avoidance and innovation agility
-
-6. **Manufacturing & Industrial**
-   - Emphasizes Operational Sovereignty (2.0×) and Managed Services (2.0×)
-   - For manufacturing plants and industrial operations
-   - Addresses production uptime and OT/IT integration
-
-7. **Telecommunications**
-   - Prioritizes Data (2.0×), Operational (2.0×), and Assurance Sovereignty (2.0×)
-   - For telecom operators and network service providers
-   - Addresses critical infrastructure and NIS2 compliance
-
-8. **Energy & Utilities**
-   - Focuses on Operational Sovereignty (2.0×) and Assurance Sovereignty (2.0×)
-   - For power generation, distribution, and utility companies
-   - Addresses critical infrastructure protection and NERC CIP
-
-9. **Custom**
-   - Fully customizable domain weights (1.0× to 2.0× in 0.5 increments)
-   - Adjust sliders to match your specific priorities
-   - Real-time visualization of weight distribution
-
-#### How Weighting Works
-
-- **Standard (1.0×)**: Normal priority
-- **Higher (1.5×)**: Increased importance
-- **Critical (2.0×)**: Maximum priority
-
-Domains with higher weights contribute more to your overall maturity score. For example, in the Financial Services profile, a strong Data Sovereignty score has twice the impact of a strong Open Source score.
-
 ### Taking an Assessment
 
-1. **Select Profile**: Choose your industry profile or select "Custom" to set your own weights
-2. **Review Domain Weights**: Check the visualization to understand which domains are prioritized
-3. **Start Assessment**: Click "Start Assessment" button to begin
-4. **Answer Questions**: Progress through 7 domains
+1. **Start Assessment**: Click "Start Assessment" button to begin
+2. **Answer Questions**: Progress through 7 domains
    - Use Next/Previous buttons to navigate
    - Answer Yes/No or select "Don't Know" for uncertain items
    - Questions are validated before proceeding
    - Progress auto-saves to browser storage
-5. **Submit**: Click "Complete Assessment" on the final section
-6. **View Results**: Review your maturity level and recommendations
-7. **Download Report**: Generate PDF report with profile information for stakeholders
-8. **Take New Assessment**: Start fresh assessment anytime
+3. **Submit**: Click "Complete Assessment" on the final section
+4. **View Results**: Review your maturity level and recommendations
+5. **Download Report**: Generate PDF report for stakeholders
+6. **Take New Assessment**: Start fresh assessment anytime
 
 ### Understanding Results
 
-#### Weighted Scoring System
-
-The assessment uses a **weighted scoring algorithm** that considers both your answers and the domain weights from your selected profile:
-
-1. **Domain Score**: Calculated for each domain (0-100% based on "Yes" answers)
-2. **Weight Application**: Each domain score is multiplied by its weight (1.0× - 2.0×)
-3. **Normalization**: Weighted scores are normalized to a 0-21 scale
-4. **Maturity Level**: Final score determines your overall maturity level
-
-**Example**: In the Financial Services profile, if you score 67% in Data Sovereignty (weight 2.0×), this contributes more to your overall score than 67% in Open Source (weight 1.0×).
-
 #### Maturity Levels
 
-Based on your **weighted score** (0-21 points), aligned with the **CMMI (Capability Maturity Model Integration)** framework:
+Based on your score (0-21 points):
 
-- **Initial (0-4.2 points / 0-20%)**: Ad-hoc and unpredictable
-  - Processes are unpredictable, poorly controlled, and reactive
-  - Success depends on individual heroics rather than proven processes
-  - Significant dependencies on external providers with minimal sovereignty controls
+- **Foundation (0-5 points)**: Early-stage maturity
+  - Ad-hoc processes with minimal sovereignty controls
+  - Significant dependencies on external providers
   - Focus: Establish executive awareness and basic policies
 
-- **Managed (4.21-8.4 points / 21-40%)**: Project-level management
-  - Projects are planned and executed in accordance with policy
-  - Requirements are managed, but processes may not be repeatable organization-wide
+- **Developing (6-10 points)**: Growing maturity
   - Basic controls are in place but not yet standardized
+  - Projects are planned but processes may not be repeatable organization-wide
   - Focus: Build repeatable practices and implement foundational controls
 
-- **Defined (8.41-12.6 points / 41-60%)**: Standardized and proactive
+- **Strategic (11-16 points)**: Mature posture
   - Processes are well characterized, understood, documented, and standardized
   - Digital sovereignty practices are consistent and repeatable across the organization
   - Clear governance structures and policies are in place
   - Focus: Ensure organization-wide consistency and pursue certifications
 
-- **Quantitatively Managed (12.61-16.8 points / 61-80%)**: Measured and controlled
-  - Processes are measured and controlled using quantitative data and statistical techniques
-  - Quantitative objectives established for quality and performance
-  - Process variations are understood and controlled
-  - Focus: Optimize through data-driven decisions and performance metrics
-
-- **Optimizing (16.81-21 points / 81-100%)**: Continuous improvement
-  - Focus on continuous improvement through quantitative feedback and innovation
+- **Advanced (17-21 points)**: Leading maturity
+  - Continuous improvement through quantitative feedback and innovation
   - Proactive identification and deployment of innovative sovereignty practices
   - Industry-leading posture with thought leadership contributions
   - Focus: Drive innovation and lead industry best practices
 
 #### Results Components
 
-- **Profile Information**: Selected profile name and description
-- **Weighted Score**: Your final score after profile weights are applied
-- **Raw Score**: Unweighted score (for reference)
 - **Score Breakdown**: Percentage-based maturity indicator
-- **Domain Analysis Table**: Shows score, applied weight, and maturity level per domain
-  - Critical domains (weight ≥1.5×) highlighted in orange
+- **Domain Analysis Table**: Shows score and maturity level per domain
   - Progress bars show percentage completion per domain
 - **Improvement Actions**: Recommended next steps based on maturity level
 - **Domain Insights**: Detailed view of strengths and improvement areas
@@ -411,31 +337,6 @@ Edit `ds-qualifier/config.php` to customize:
 - Question text
 - Domain definitions
 - Tooltips and help text
-- Individual question weights (currently unused - domain-level weighting is used instead)
-
-### Weighting Profiles
-Edit `ds-qualifier/profiles.php` to customize or add new profiles:
-- Profile name, description, and icon
-- Domain weights (1.0 to 2.0 scale)
-- Industry-specific context
-
-**Adding a New Profile**:
-```php
-'profile-key' => [
-    'name' => 'Profile Display Name',
-    'description' => 'Detailed description including industry context',
-    'icon' => 'fa-icon-name',
-    'weights' => [
-        'Data Sovereignty' => 1.5,
-        'Technical Sovereignty' => 2.0,
-        'Operational Sovereignty' => 1.0,
-        'Assurance Sovereignty' => 1.5,
-        'Open Source' => 1.0,
-        'Executive Oversight' => 1.0,
-        'Managed Services' => 1.5
-    ]
-]
-```
 
 ## Dependencies
 
@@ -484,15 +385,15 @@ Edit `ds-qualifier/profiles.php` to customize or add new profiles:
 **Issue**: Permission denied errors
 ```bash
 # Solution: Set correct ownership and permissions
-sudo chown -R apache:apache /var/www/html/viewfinder-lite
-sudo chmod 755 /var/www/html/viewfinder-lite
-sudo chmod 775 /var/www/html/viewfinder-lite/logs
+sudo chown -R apache:apache /var/www/html/viewfinder-upstream
+sudo chmod 755 /var/www/html/viewfinder-upstream
+sudo chmod 775 /var/www/html/viewfinder-upstream/logs
 ```
 
 **Issue**: Composer dependencies not found
 ```bash
 # Solution: Run composer install
-cd /var/www/html/viewfinder-lite
+cd /var/www/html/viewfinder-upstream
 composer install --no-dev --optimize-autoloader
 ```
 
@@ -517,10 +418,10 @@ View application logs for troubleshooting:
 
 ```bash
 # View recent logs
-tail -f /var/www/html/viewfinder-lite/logs/app.log
+tail -f /var/www/html/viewfinder-upstream/logs/app.log
 
 # Search for errors
-grep ERROR /var/www/html/viewfinder-lite/logs/app.log
+grep ERROR /var/www/html/viewfinder-upstream/logs/app.log
 
 # View web server logs
 tail -f /var/log/httpd/error_log    # Apache (RHEL/CentOS)
@@ -564,6 +465,13 @@ Apache-2.0 License - Red Hat
 
 ## Support
 
+This is a community-supported open source project. For issues, questions, or feature requests:
+
+- **GitHub Issues**: https://github.com/redhat-cop/viewfinder-upstream/issues
+- **GitHub Discussions**: https://github.com/redhat-cop/viewfinder-upstream/discussions
+- **Red Hat Community of Practice**: https://github.com/redhat-cop
+
+For enterprise support and the enhanced CMMI version, contact your Red Hat representative.
 For issues, questions, or feature requests, please refer to the main Viewfinder project documentation or contact your Red Hat representative.
 
 ## Disclaimer
@@ -574,4 +482,4 @@ This application is provided for informational purposes only. The information is
 
 **Viewfinder Lite** - Streamlined Digital Sovereignty Readiness Assessment
 
-Version: 1.1.0
+Version: 1.0.0
